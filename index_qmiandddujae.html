@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<!-- Bootstrap CSS -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+			crossorigin="anonymous"
+		/>
+
+		<title>큐미♥뜌재의 동물 닮음도 테스트 </title>
+			<link rel="stylesheet" href="style.css" /> 
+	</head>
+	<body>	
+		<nav class="navbar navbar-expand-lg navbar-light nav-distance">
+			<div class="container-fluid">
+				<a class="navbar-brand" href="#">큐미♥뜌재</a>
+				<button
+					class="navbar-toggler"
+					type="button"
+					data-bs-toggle="collapse"
+					data-bs-target="#navbarNav"
+					aria-controls="navbarNav"
+					aria-expanded="false"
+					aria-label="Toggle navigation"
+				>
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarNav">
+					<ul class="navbar-nav">
+						<li class="nav-item">
+							<a class="nav-link active" aria-current="page" href="#">Home</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#">Features</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#">Pricing</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true"
+								>Disabled</a
+							>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	
+		<section class="section">
+			<h1 class="title">닮은 동물 얼굴형 AI진단 테스트</h1>			
+			<h2 class="subtitle">당신의 유사한 동물 얼굴형은 ?</h2>
+		</section>
+	
+		<section class="youtube">
+			<div class="youtube-cover">
+				<img src="img/qmi_sj2.JPG" alt="" class="youtube-icon"></div>	
+				<a href="" class="youtube-link">By 뀨미뜌미 뀨재뜌재</a>
+		</section>
+		
+		
+		<!-- //face-image라는 id 추가 -->
+
+		<div>큐미♥뜌재 동물 인식기입니다. 설명서 : [1], [2], [3] 순차적으로 누르시면 됩니다.</div>
+		
+	
+		<div class="file-upload">
+			<button class="file-upload-btn" type="button" onclick="init()">[1] AI모델 탑재</button>
+		</div>
+		
+		<script
+			class="jsbin"
+			src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"
+		></script>
+		
+		<div class="file-upload">
+			<button
+				class="file-upload-btn"
+				type="button"
+				onclick="$('.file-upload-input').trigger( 'click' )">[2] 이미지 첨부</button>
+
+			<div class="image-upload-wrap">
+				<input
+					class="file-upload-input"
+					type="file"
+					onchange="readURL(this);"
+					accept="image/*"
+				/>
+				<div class="drag-text">
+					<h3>Drag and drop a file or select add Image</h3>
+				</div>
+			</div>
+			<div class="file-upload-content">
+				<img class="file-upload-image" id="face-image" src="#" alt="your image" />
+				<div class="image-title-wrap">
+					<button type="button" onclick="removeUpload()" class="remove-image">
+						Remove <span class="image-title">Uploaded Image</span>
+					</button>
+				</div>
+			</div>
+		</div>
+		
+		<div class="file-upload">
+			<button class="file-upload-btn" type="button" onclick="predict()">[3] 인식 결과</button>
+		</div>
+		
+		<div id="webcam-container"></div>
+		<div id="label-container"></div>
+
+		<!-- 부트스트랩에서 제공하는 네이게이션 바를 사용 -->
+		<!-- Option 2: Separate Popper and Bootstrap JS -->
+		<script
+			src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"
+			integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js"
+			integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj"
+			crossorigin="anonymous"
+		></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+		<script>
+			function readURL(input) {
+				if (input.files && input.files[0]) {
+					var reader = new FileReader();
+
+					reader.onload = function (e) {
+						$('.image-upload-wrap').hide();
+
+						$('.file-upload-image').attr('src', e.target.result);
+						$('.file-upload-content').show();
+
+						$('.image-title').html(input.files[0].name);
+					};
+
+					reader.readAsDataURL(input.files[0]);
+				} else {
+					removeUpload();
+				}
+			}
+
+			function removeUpload() {
+				$('.file-upload-input').replaceWith($('.file-upload-input').clone());
+				$('.file-upload-content').hide();
+				$('.image-upload-wrap').show();
+			}
+			$('.image-upload-wrap').bind('dragover', function () {
+				$('.image-upload-wrap').addClass('image-dropping');
+			});
+			$('.image-upload-wrap').bind('dragleave', function () {
+				$('.image-upload-wrap').removeClass('image-dropping');
+			});
+		</script>
+		<script type="text/javascript">
+			// More API functions here:
+			// https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+
+			// the link to your model provided by Teachable Machine export panel
+			const URL = 'https://teachablemachine.withgoogle.com/models/DqN-F0hxU/';
+
+			let model, webcam, labelContainer, maxPredictions;
+
+			// Load the image model and setup the webcam
+			async function init() {
+				const modelURL = URL + 'model.json';
+				const metadataURL = URL + 'metadata.json';
+				// 모델 로드
+				// load the model and metadata
+				// Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+				// or files from your local hard drive
+				// Note: the pose library adds "tmImage" object to your window (window.tmImage)
+				model = await tmImage.load(modelURL, metadataURL);
+				maxPredictions = model.getTotalClasses();
+				labelContainer = document.getElementById('label-container');
+				alert('AI모델이 탑재되었습니다. [2]으로 진행하십시오.');
+				for (let i = 0; i < maxPredictions; i++) {
+					// and class labels
+					labelContainer.appendChild(document.createElement('div'));
+				}
+			}
+			// Predict 영역
+			// run the webcam image through the image model
+			async function predict() {
+				// predict can take in an image, video or canvas html element
+				// 아래에 HTML 이미지를 넣어 주려면
+				// image변수를 만들고 document 중에 Id를 통해서 이미지를 가져옴
+				var image = document.getElementById('face-image');
+
+				//인자가 flipped는 안뒤집혔으니 false로 설정함
+				const prediction = await model.predict(image, false); // 모델 예측 수행
+
+				// 모델 예측 결과를 prediction에 담아서 HTML로 표시하는 역할 수행
+				for (let i = 0; i < maxPredictions; i++) {
+					const classPrediction =
+						prediction[i].className + ': ' + prediction[i].probability.toFixed(2);
+					labelContainer.childNodes[i].innerHTML = classPrediction;
+				}
+			}
+		</script>
+	</body>
+	<!-- Copyright (c) 2021 by Aaron Vanston (https://codepen.io/aaronvanston/pen/yNYOXR) -->
+	<!-- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: -->
+	<!-- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+</html>
